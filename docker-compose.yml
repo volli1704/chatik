@@ -2,9 +2,21 @@ version: '3.8'
 services:
   db:
     image: postgres:14.1-alpine
-    env_file:
-      - "${ENV}.env"
+    environment:
+      - 'POSTGRES_DB=${DB_NAME}'
+      - 'POSTGRES_USER=${DB_USER}'
+      - 'POSTGRES_PASSWORD=${DB_PASS}'
     ports:
       - "5432:5432"
-    command: env
-    
+    volumes:
+      - ./deployments/database/init.d:/docker-entrypoint-initdb.d
+      - db-data:/var/lib/postgresql/data
+      - ./deployments/database/conf.d:/etc/postgresql/conf.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+volumes:
+  db-data:
