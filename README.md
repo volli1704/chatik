@@ -1,1 +1,1 @@
-Studying chat project
+chat project
